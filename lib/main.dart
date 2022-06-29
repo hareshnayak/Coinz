@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
+import 'contract/contractFunctions.dart';
 import 'env/secretKeys.dart';
 
 void main() {
@@ -49,13 +50,6 @@ class _MyHomePageState extends State<MyHomePage> {
     getBalance(myAddress);
   }
 
-  Future<DeployedContract> loadContract() async {
-    String abi = await rootBundle.loadString("assets/abi.json");
-    String contractAddress = CONTRACT_ADDRESS;
-    final contract = DeployedContract(ContractAbi.fromJson(abi, "HarryCoin"),
-      EthereumAddress.fromHex(contractAddress),);
-    return contract;
-  }
 
   Future<List<dynamic>> query(String functionName, List<dynamic> args) async {
     final contract = await loadContract();
@@ -79,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
     print('data : $data');
   }
 
-  
+
   Future<String> submit(String functionName, List<dynamic> args) async{
     EthPrivateKey credentials = EthPrivateKey.fromHex(privateKey);
 
@@ -89,13 +83,13 @@ class _MyHomePageState extends State<MyHomePage> {
         function: ethFunction, parameters: args), chainId: 3);
 
     return result;
-  } 
-  
-  
+  }
+
+
   Future<String> sendCoin() async{
     var bigAmount = BigInt.from(myAmount);
     var response = await submit("depositBalance", [bigAmount]);
-    
+
     print("deposited");
     return response;
   }
@@ -107,6 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
     print("withdrawn");
     return response;
   }
+
 
 
 
