@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
+import 'env/secretKeys.dart';
 
 void main() {
   runApp(MyApp());
@@ -35,9 +36,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   bool data = false;
   int myAmount = 0;
-  String infuraUrl = "https://ropsten.infura.io/v3/a7e3f028bac945f1b304b6a3755297d6";
-  final myAddress = "0x5c6D144Aa3D3cF4F403cb4f8df326Bc91d4721d4";
-
+  String infuraUrl = INFURA_URL;
+  final myAddress = MY_ADDRESS;
+  String privateKey = PRIVATE_KEY;
   var myData;
 
   @override
@@ -50,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<DeployedContract> loadContract() async {
     String abi = await rootBundle.loadString("assets/abi.json");
-    String contractAddress = "0x6aaE259501e37000043fd9EBE6418E4Dd9901e84";
+    String contractAddress = CONTRACT_ADDRESS;
     final contract = DeployedContract(ContractAbi.fromJson(abi, "HarryCoin"),
       EthereumAddress.fromHex(contractAddress),);
     return contract;
@@ -77,6 +78,37 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     print('data : $data');
   }
+
+  
+  Future<String> submit(String functionName, List<dynamic> args) async{
+    EthPrivateKey credentials = EthPrivateKey.fromHex(privateKey);
+
+    DeployedContract contract = await loadContract();
+    final ethFunction = contract.function(functionName);
+    final result = await ethClient.sendTransaction(credentials, Transaction.callContract(contract: contract,
+        function: ethFunction, parameters: args), chainId: 3);
+
+    return result;
+  } 
+  
+  
+  Future<String> sendCoin() async{
+    var bigAmount = BigInt.from(myAmount);
+    var response = await submit("depositBalance", [bigAmount]);
+    
+    print("deposited");
+    return response;
+  }
+
+  Future<String> withdrawCoin() async{
+    var bigAmount = BigInt.from(myAmount);
+    var response = await submit("withdrawBalance", [bigAmount]);
+
+    print("withdrawn");
+    return response;
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     shape: MaterialStateProperty.all(RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),),),
                   ),
-                  onPressed: () {},
+                  onPressed: () {sendCoin();},
                   icon: Icon(Icons.call_made_outlined),
                   label: Text('Deposit'),),
                 TextButton.icon(
@@ -132,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         borderRadius: BorderRadius.circular(20))),
                     backgroundColor: MaterialStateProperty.all(Colors.purple),
                   ),
-                  onPressed: () {},
+                  onPressed: () {withdrawCoin();},
                   icon: Icon(Icons.call_received_outlined),
                   label: Text('Withdraw'),),
               ],
