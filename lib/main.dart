@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
-import 'contract/contractFunctions.dart';
+import 'contractFunctions/contractFunctions.dart';
 import 'env/secretKeys.dart';
 
 void main() {

@@ -9,6 +9,8 @@
 .history
 .svn/
 migrate_working_dir/
+.env
+server/node_modules
 
 # Secret Keys
 lib/env/secretKeys.dart
